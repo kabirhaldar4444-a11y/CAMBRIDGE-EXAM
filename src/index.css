@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #0D4A38;
+  --primary-light: #126E51;
+  --secondary-color: #BA6438;
+  --secondary-light: #D97736;
+  --accent-color: #167A58;
+  --bg-gradient: radial-gradient(circle at 15% 15%, #FAF8F5 0%, #F2F7F4 45%, #F7FAF8 100%);
+  --glass-bg: rgba(255, 255, 255, 0.86);
+  --card-bg: #ffffff;
+  --glass-border: rgba(13, 74, 56, 0.10);
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+}
+
+@layer base {
+  body {
+    @apply font-inter text-slate-900 min-h-screen antialiased selection:bg-primary-500/20 overflow-x-hidden;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-outfit;
+  }
+}
+
+@layer components {
+  /* Premium Cambridge Glass Components */
+  .glass-card-saas {
+    @apply backdrop-blur-2xl rounded-[2.5rem] transition-all duration-500;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 12px 36px 0 rgba(7, 37, 28, 0.06);
+  }
+
+  .glass-panel {
+    @apply backdrop-blur-xl rounded-2xl shadow-lg transition-all duration-300;
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+  }
+
+  .glass-navbar {
+    @apply backdrop-blur-2xl sticky top-0 z-50 transition-all duration-300;
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  /* Cambridge Signature Buttons */
+  .btn-premium {
+    @apply rounded-2xl px-8 py-4 font-bold text-white shadow-xl transition-all duration-300 
+           flex items-center justify-center gap-2 relative overflow-hidden active:scale-95;
+    background: linear-gradient(135deg, #0D4A38 0%, #157354 100%);
+    box-shadow: 0 10px 25px -5px rgba(13, 74, 56, 0.35);
+  }
+
+  .btn-premium:hover {
+    @apply brightness-110 -translate-y-0.5;
+    box-shadow: 0 14px 30px -5px rgba(13, 74, 56, 0.45);
+  }
+
+  .btn-copper {
+    @apply rounded-2xl px-8 py-4 font-bold text-white shadow-xl transition-all duration-300 
+           flex items-center justify-center gap-2 relative overflow-hidden active:scale-95;
+    background: linear-gradient(135deg, #BA6438 0%, #D97736 100%);
+    box-shadow: 0 10px 25px -5px rgba(186, 100, 56, 0.35);
+  }
+
+  .btn-copper:hover {
+    @apply brightness-110 -translate-y-0.5;
+    box-shadow: 0 14px 30px -5px rgba(186, 100, 56, 0.45);
+  }
+
+  /* Premium Inputs */
+  .input-premium {
+    @apply rounded-xl px-6 py-4 bg-white/70 border border-slate-200/80 backdrop-blur-sm transition-all duration-300
+           focus:bg-white focus:border-primary-600 focus:ring-4 focus:ring-primary-500/10 outline-none
+           placeholder:text-slate-400 placeholder:font-medium text-slate-800;
+  }
+
+  /* Cambridge Ambient Decorative Elements */
+  .blob {
+    @apply absolute blur-[70px] md:blur-[110px] pointer-events-none transition-all duration-1000;
+    animation: blob-float 15s infinite alternate ease-in-out, blob-morph 20s infinite alternate ease-in-out;
+  }
+
+  .bubble {
+    @apply absolute pointer-events-none rounded-full flex items-center justify-center text-center transition-all duration-1000;
+  }
+
+  .bubble-glow {
+    @apply absolute inset-0 rounded-full blur-[10px] md:blur-[16px] -z-10;
+    background: inherit;
+  }
+
+  .bubble-content {
+    @apply relative z-10 flex items-center justify-center w-full h-full p-2;
+  }
+
+  .bubble-text {
+    @apply text-white font-black text-[9px] md:text-[11px] leading-tight uppercase tracking-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)];
+  }
+}
+
+@keyframes bubble-drift-right {
+  0% { transform: translateX(-20vw) translateY(0) scale(1); }
+  50% { transform: translateX(50vw) translateY(-40px) scale(1.15); }
+  100% { transform: translateX(120vw) translateY(0) scale(1); }
+}
+
+@keyframes bubble-drift-left {
+  0% { transform: translateX(120vw) translateY(0) scale(1); }
+  50% { transform: translateX(50vw) translateY(40px) scale(0.85); }
+  100% { transform: translateX(-20vw) translateY(0) scale(1); }
+}
+
+@keyframes blob-morph {
+  0% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; }
+  34% { border-radius: 70% 30% 46% 54% / 30% 29% 71% 70%; }
+  67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+  100% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; }
+}
+
+@keyframes blob-float {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33% { transform: translate(150px, -100px) scale(1.2) rotate(120deg); }
+  66% { transform: translate(-100px, 150px) scale(0.8) rotate(240deg); }
+  100% { transform: translate(0, 0) scale(1) rotate(360deg); }
+}
+
+/* Custom Utilities */
+.shadow-bloom {
+  box-shadow: 0 0 40px rgba(13, 74, 56, 0.12);
+}
+
+.shadow-copper {
+  box-shadow: 0 0 40px rgba(186, 100, 56, 0.15);
+}
+
+.glass-card-saas:hover {
+  @apply -translate-y-1;
+  box-shadow: 0 25px 50px -12px rgba(7, 37, 28, 0.12);
+}
+
+/* Page Transitions */
+.page-transition {
+  @apply transition-all duration-700 ease-out;
+}
+
+/* Hide Number Input Spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Stacking Context Overlap Fix when modals are active */
+body:has(.fixed.inset-0[class*="z-["]) nav.fixed {
+  z-index: 10 !important;
+}
+body:has(.fixed.inset-0[class*="z-["]) main {
+  z-index: 40 !important;
+  position: relative !important;
+}
+
+/* Premium Custom Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(13, 74, 56, 0.2);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(13, 74, 56, 0.4);
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar-dark::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+  background: rgba(18, 110, 81, 0.25);
+  border-radius: 9999px;
+}
+.custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: rgba(186, 100, 56, 0.45);
+}

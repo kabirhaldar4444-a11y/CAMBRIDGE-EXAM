@@ -1,0 +1,36 @@
+<svg viewBox="0 0 512 512" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background subtle shadow -->
+    <filter id="clsGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#07251C" flood-opacity="0.18" />
+    </filter>
+    <linearGradient id="clsGreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#126E51"/>
+      <stop offset="100%" stop-color="#0B3B2B"/>
+    </linearGradient>
+    <linearGradient id="clsCopperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D97736"/>
+      <stop offset="100%" stop-color="#B85D33"/>
+    </linearGradient>
+    <linearGradient id="clsDarkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D3748"/>
+      <stop offset="100%" stop-color="#1A202C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Clean Canvas -->
+  <rect width="512" height="512" rx="112" fill="#FFFFFF" filter="url(#clsGlow)"/>
+
+  <!-- Outer Rounded Border (Forest Green) -->
+  <rect x="28" y="28" width="456" height="456" rx="92" fill="none" stroke="#0B3B2B" stroke-width="26"/>
+
+  <!-- Monogram Elements -->
+  <!-- 'C' on Left (Forest Green) -->
+  <path d="M 198 190 C 198 178 188 168 176 168 L 140 168 C 114 168 94 188 94 214 L 94 374 C 94 394 108 408 128 408 L 198 408 L 198 372 L 132 372 L 132 204 L 198 204 Z" fill="url(#clsGreenGrad)"/>
+
+  <!-- 'L' in Center (Dark Slate/Charcoal) -->
+  <path d="M 218 136 C 218 126 226 118 236 118 L 268 118 C 278 118 286 126 286 136 L 286 372 L 308 372 C 318 372 326 380 326 390 L 326 408 L 236 408 C 226 408 218 400 218 390 Z" fill="url(#clsDarkGrad)"/>
+
+  <!-- 'S' on Right (Terracotta / Copper) -->
+  <path d="M 398 94 L 340 168 L 340 220 L 372 260 C 378 268 382 278 382 288 L 382 396 C 382 403 388 408 395 408 L 418 408 L 418 274 C 418 262 414 250 406 240 L 374 200 L 374 176 L 416 124 Z" fill="url(#clsCopperGrad)"/>
+</svg>
