@@ -845,19 +845,20 @@ Submitted via Cambridge Learning Services Exam Portal
         import.meta.env.VITE_WEB3FORMS_ACCESS_KEY ||
         '472f31d3-b4ff-46f5-8947-c1148f7aa52e';
 
-      await fetch('https://api.web3forms.com/submit', {
+      const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
           access_key: accessKey,
+          name: fullName,
+          email: email,
           subject: `Admission Form Submitted — ${fullName}`,
           from_name: 'Cambridge Learning Services Exam Portal',
-          recipient: import.meta.env.VITE_ADMIN_EMAIL || 'support@cambridgelearningservices.org',
-          email: email,
           message: messageContent
         })
       });
-      console.log('Admission Web3Forms email notification sent successfully.');
+      const data = await response.json();
+      console.log('Admission Web3Forms email notification response:', data);
     } catch (err) {
       console.error('Web3Forms notification error:', err);
     }
@@ -918,16 +919,28 @@ Submitted via Cambridge Learning Services Exam Portal
 
       const fullAddress = `${formData.addressLine}, ${formData.city}, ${formData.state} - ${formData.pincode}`;
 
-      const refId = typeof crypto !== 'undefined' && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `adm_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const generateUUID = () => {
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+          try {
+            return crypto.randomUUID();
+          } catch (e) {}
+        }
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+          const r = (Math.random() * 16) | 0;
+          const v = c === 'x' ? r : (r & 0x3) | 0x8;
+          return v.toString(16);
+        });
+      };
+
+      const refId = generateUUID();
+      const safePhone = formData.phone?.trim() ? formData.phone.trim() : `NO_PHONE_${refId.slice(0, 8)}`;
 
       // Insert record to admissions table (without .select() to comply with anon INSERT-only RLS policy)
       const { error } = await supabase.from('admissions').insert({
         id: refId,
         full_name: formData.fullName,
         email: formData.email,
-        phone: formData.phone,
+        phone: safePhone,
         pincode: formData.pincode,
         state: formData.state,
         city: formData.city,
@@ -951,7 +964,7 @@ Submitted via Cambridge Learning Services Exam Portal
         referenceId: refId,
         fullName: formData.fullName,
         email: formData.email,
-        phone: formData.phone,
+        phone: safePhone,
         pincode: formData.pincode,
         state: formData.state,
         city: formData.city,

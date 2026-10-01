@@ -76,9 +76,11 @@ ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
 ALTER TABLE public.profiles ADD  CONSTRAINT profiles_role_check
   CHECK (role IN ('super_admin', 'admin', 'candidate'));
 
--- Enforce unique phone numbers
+-- Enforce unique phone numbers only for actual provided numbers
 ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_phone_key;
-ALTER TABLE public.profiles ADD  CONSTRAINT profiles_phone_key UNIQUE (phone);
+DROP INDEX IF EXISTS public.profiles_phone_key;
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_phone_key ON public.profiles (phone)
+  WHERE phone IS NOT NULL AND phone != '' AND phone NOT LIKE 'NO_PHONE%';
 
 -- Clean any array discrepancies
 ALTER TABLE public.profiles ALTER COLUMN allotted_exam_ids TYPE UUID[] USING
@@ -466,8 +468,10 @@ BEGIN
     RAISE EXCEPTION 'User account with email % already exists.', v_admission.email;
   END IF;
 
-  IF EXISTS (SELECT 1 FROM public.profiles WHERE phone = v_admission.phone) THEN
-    RAISE EXCEPTION 'Candidate with phone number % already exists.', v_admission.phone;
+  IF v_admission.phone IS NOT NULL AND v_admission.phone != '' AND v_admission.phone != '+91' AND v_admission.phone NOT LIKE 'NO_PHONE%' THEN
+    IF EXISTS (SELECT 1 FROM public.profiles WHERE phone = v_admission.phone) THEN
+      RAISE EXCEPTION 'Candidate with phone number % already exists.', v_admission.phone;
+    END IF;
   END IF;
 
   new_user_id := gen_random_uuid();
@@ -483,7 +487,8 @@ BEGIN
     v_admission.email, crypt(p_password, gen_salt('bf')), NOW(),
     '{"provider":"email","providers":["email"]}',
     jsonb_build_object('full_name', v_admission.full_name), FALSE, NOW(), NOW(),
-    v_admission.phone, NOW(), '', '', '', ''
+    CASE WHEN v_admission.phone LIKE 'NO_PHONE%' OR v_admission.phone = '' OR v_admission.phone = '+91' THEN NULL ELSE v_admission.phone END,
+    NOW(), '', '', '', ''
   );
 
   -- Auth identity
@@ -504,7 +509,9 @@ BEGIN
     service_delivery_step
   )
   VALUES (
-    new_user_id, v_admission.email, v_admission.full_name, v_admission.phone, v_admission.address,
+    new_user_id, v_admission.email, v_admission.full_name,
+    CASE WHEN v_admission.phone LIKE 'NO_PHONE%' OR v_admission.phone = '' OR v_admission.phone = '+91' THEN NULL ELSE v_admission.phone END,
+    v_admission.address,
     v_admission.aadhaar_front_url, v_admission.aadhaar_back_url,
     COALESCE(v_admission.profile_photo_url, v_admission.video_url),
     v_admission.signature_url, v_admission.pan_url,

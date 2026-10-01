@@ -3,7 +3,8 @@ import { supabase } from '../../utils/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, Search, User, Mail, Phone, MapPin, Calendar, Network,
-  CheckCircle, Loader2, RefreshCw, X, Download, ShieldAlert, Eye, Copy, Check, ChevronDown, BookOpen
+  CheckCircle, Loader2, RefreshCw, X, Download, ShieldAlert, Eye, Copy, Check, ChevronDown, BookOpen,
+  UserX, AlertTriangle
 } from 'lucide-react';
 import { useAlert } from '../../context/AlertProvider';
 
@@ -23,6 +24,8 @@ const AdmissionsManagement = () => {
   const [examDropdownOpen, setExamDropdownOpen] = useState(false);
   const [approving, setApproving] = useState(false);
   const [approvalSuccessDetails, setApprovalSuccessDetails] = useState(null);
+  const [rejectingAdmission, setRejectingAdmission] = useState(null);
+  const [rejecting, setRejecting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -86,6 +89,16 @@ const AdmissionsManagement = () => {
     try {
       const primaryExamId = allottedExamIds.length > 0 ? allottedExamIds[0] : null;
 
+      // Ensure admission does not trigger unique constraint or duplicate phone error if empty/missing
+      let phoneVal = approvingAdmission.phone?.trim();
+      let wasPlaceholderPhone = false;
+      if (!phoneVal || phoneVal === '' || phoneVal === '+91' || phoneVal.startsWith('NO_PHONE')) {
+        const safePhone = `NO_PHONE_${approvingAdmission.id.slice(0, 8)}`;
+        await supabase.from('admissions').update({ phone: safePhone }).eq('id', approvingAdmission.id);
+        approvingAdmission.phone = safePhone;
+        wasPlaceholderPhone = true;
+      }
+
       // Call create_user_from_admission RPC on Supabase
       const { data: newUserId, error } = await supabase.rpc('create_user_from_admission', {
         p_admission_id: approvingAdmission.id,
@@ -100,12 +113,15 @@ const AdmissionsManagement = () => {
         throw error;
       }
 
-      // Sync profile updates (allotted exams, video_url, ip_address)
+      // Sync profile updates (allotted exams, video_url, ip_address, clear placeholder phone to null)
       if (newUserId) {
         const profileUpdates = {};
         if (allottedExamIds.length > 0) profileUpdates.allotted_exam_ids = allottedExamIds;
         if (approvingAdmission.video_url) profileUpdates.video_url = approvingAdmission.video_url;
         if (approvingAdmission.ip_address) profileUpdates.ip_address = approvingAdmission.ip_address;
+        if (wasPlaceholderPhone) {
+          profileUpdates.phone = null;
+        }
 
         if (Object.keys(profileUpdates).length > 0) {
           try {
@@ -135,6 +151,32 @@ const AdmissionsManagement = () => {
       showAlert(err.message || 'Error approving admission.', 'error');
     } finally {
       setApproving(false);
+    }
+  };
+
+  const handleOpenRejectModal = (admission) => {
+    setRejectingAdmission(admission);
+  };
+
+  const handleConfirmReject = async () => {
+    if (!rejectingAdmission) return;
+    setRejecting(true);
+    try {
+      const { error } = await supabase
+        .from('admissions')
+        .update({ status: 'rejected' })
+        .eq('id', rejectingAdmission.id);
+
+      if (error) throw error;
+
+      showAlert(`Application for ${rejectingAdmission.full_name} rejected.`, 'info');
+      setAdmissions(prev => prev.map(a => a.id === rejectingAdmission.id ? { ...a, status: 'rejected' } : a));
+      setRejectingAdmission(null);
+    } catch (err) {
+      console.error(err);
+      showAlert(err.message || 'Error rejecting application.', 'error');
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -248,7 +290,11 @@ const AdmissionsManagement = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>+91 {adm.phone}</span>
+                        <span>
+                          {adm.phone && !adm.phone.startsWith('NO_PHONE') && adm.phone.trim() !== '' && adm.phone.trim() !== '+91'
+                            ? (adm.phone.startsWith('+91') ? adm.phone : `+91 ${adm.phone}`)
+                            : 'No Phone Provided'}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -330,11 +376,18 @@ const AdmissionsManagement = () => {
                   </button>
                 </div>
 
-                {/* Create user buttons */}
-                <div className="flex gap-2 w-full lg:w-auto">
+                {/* Create user & Reject buttons */}
+                <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                  <button
+                    onClick={() => handleOpenRejectModal(adm)}
+                    className="w-full sm:w-auto px-4 py-3 rounded-2xl border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                  >
+                    <UserX className="w-4 h-4" />
+                    Reject
+                  </button>
                   <button
                     onClick={() => handleOpenApproveModal(adm)}
-                    className="w-full lg:w-auto px-5 py-3 rounded-2xl bg-slate-900 hover:bg-black text-white font-bold text-xs uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all"
+                    className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-900 hover:bg-black text-white font-bold text-xs uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all"
                   >
                     Accept & Create User ✓
                   </button>
@@ -631,6 +684,71 @@ const AdmissionsManagement = () => {
                     </button>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Confirmation Modal for Rejecting Candidate */}
+      <AnimatePresence>
+        {rejectingAdmission && (
+          <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+              onClick={() => !rejecting && setRejectingAdmission(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100 z-10 font-outfit"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 text-red-500 flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 text-center">
+                Confirm Candidate Rejection
+              </h3>
+              <p className="text-slate-500 text-xs text-center mt-2 leading-relaxed font-medium">
+                Are you sure you want to reject the application for{' '}
+                <span className="font-bold text-slate-800">{rejectingAdmission.full_name}</span>{' '}
+                ({rejectingAdmission.email})?
+              </p>
+              <p className="text-slate-400 text-[11px] text-center mt-1">
+                This action will mark the admission application as <strong className="text-red-500 font-bold">Rejected</strong>.
+              </p>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  disabled={rejecting}
+                  onClick={() => setRejectingAdmission(null)}
+                  className="flex-1 py-3 rounded-2xl border border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-wider hover:bg-slate-50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={rejecting}
+                  onClick={handleConfirmReject}
+                  className="flex-1 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/20 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {rejecting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Rejecting...
+                    </>
+                  ) : (
+                    <>
+                      <UserX className="w-4 h-4" />
+                      Confirm Reject
+                    </>
+                  )}
+                </button>
               </div>
             </motion.div>
           </div>
