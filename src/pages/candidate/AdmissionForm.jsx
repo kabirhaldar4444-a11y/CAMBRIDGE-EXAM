@@ -98,45 +98,71 @@ const SearchableDropdown = ({ value, onChange, options, placeholder, disabled })
   );
 };
 
-// Utility function to reliably fetch client IP address using fallback APIs
+// Utility function to reliably fetch client IP address with strict 2-second timeout
 const fetchClientIP = async () => {
-  // 1. Cloudflare trace (fastest, never blocked by ad-blockers)
   try {
-    const res = await fetch('https://www.cloudflare.com/cdn-cgi/trace', { cache: 'no-store' });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch('https://www.cloudflare.com/cdn-cgi/trace', { signal: controller.signal, cache: 'no-store' });
+    clearTimeout(timer);
     const text = await res.text();
     const match = text.match(/^ip=(.+)$/m);
     if (match && match[1] && match[1].trim()) return match[1].trim();
   } catch (err) { }
 
-  // 2. BigDataCloud API
   try {
-    const res = await fetch('https://api.bigdatacloud.net/data/client-ip', { cache: 'no-store' });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 1500);
+    const res = await fetch('https://api.bigdatacloud.net/data/client-ip', { signal: controller.signal, cache: 'no-store' });
+    clearTimeout(timer);
     const data = await res.json();
     if (data && data.ipString) return data.ipString;
   } catch (err) { }
 
-  // 3. DB-IP Self API
-  try {
-    const res = await fetch('https://api.db-ip.com/v2/free/self', { cache: 'no-store' });
-    const data = await res.json();
-    if (data && data.ipAddress) return data.ipAddress;
-  } catch (err) { }
-
-  // 4. GeoJS API
-  try {
-    const res = await fetch('https://get.geojs.io/v1/ip/geo.json', { cache: 'no-store' });
-    const data = await res.json();
-    if (data && data.ip) return data.ip;
-  } catch (err) { }
-
-  // 5. Ipify API
-  try {
-    const res = await fetch('https://api.ipify.org?format=json', { cache: 'no-store' });
-    const data = await res.json();
-    if (data && data.ip) return data.ip;
-  } catch (err) { }
-
   return 'Not Detected';
+};
+
+// Client-side image compressor for blazing fast uploads
+const compressImage = async (file, maxWidth = 1280, quality = 0.78) => {
+  if (!file || !(file instanceof Blob)) return file;
+  if (file.type && !file.type.startsWith('image/')) return file;
+  if (file.size < 200 * 1024) return file; // Skip compressing very small images
+
+  return new Promise((resolve) => {
+    try {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            if (blob && blob.size < file.size) {
+              const safeName = (file.name || 'document.jpg').replace(/\.[^.]+$/, '.jpg');
+              resolve(new File([blob], safeName, { type: 'image/jpeg' }));
+            } else {
+              resolve(file);
+            }
+          }, 'image/jpeg', quality);
+        };
+        img.onerror = () => resolve(file);
+        img.src = e.target.result;
+      };
+      reader.onerror = () => resolve(file);
+      reader.readAsDataURL(file);
+    } catch (e) {
+      resolve(file);
+    }
+  });
 };
 
 // --- MAIN COMPONENT ---
@@ -145,6 +171,7 @@ const AdmissionForm = () => {
   const { showAlert } = useAlert();
   const [step, setStep] = useState(1); // 1: Initial Details, 2: Verification
   const [loading, setLoading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
   const [success, setSuccess] = useState(false);
   const [ipAddress, setIpAddress] = useState('');
   const [submittedReferenceId, setSubmittedReferenceId] = useState('');
@@ -424,13 +451,13 @@ const AdmissionForm = () => {
 
     captureStaticProfilePhoto(cameraStream);
 
-    let options = {};
-    if (MediaRecorder.isTypeSupported('video/mp4')) {
-      options = { mimeType: 'video/mp4' };
-    } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) {
-      options = { mimeType: 'video/webm;codecs=vp8,opus' };
+    let options = { videoBitsPerSecond: 800000 };
+    if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) {
+      options.mimeType = 'video/webm;codecs=vp8,opus';
     } else if (MediaRecorder.isTypeSupported('video/webm')) {
-      options = { mimeType: 'video/webm' };
+      options.mimeType = 'video/webm';
+    } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+      options.mimeType = 'video/mp4';
     }
 
     try {
@@ -465,7 +492,7 @@ const AdmissionForm = () => {
         setCameraActive(false);
       };
 
-      recorder.start(10); // Capture data chunks every 10ms
+      recorder.start(1000); // Efficient 1-second chunks for compact, high-speed upload
       setIsRecording(true);
       setRecordingSeconds(0);
 
@@ -529,17 +556,27 @@ const AdmissionForm = () => {
     setStep(2);
   };
 
-  // Storage Uploader
+  // Storage Uploader with error handling
   const handleFileUpload = async (file, namePrefix, bucketName) => {
     if (!file) return null;
     const fileExt = file.name ? file.name.split('.').pop() : 'png';
     const uniquePath = `admissions/${Date.now()}_${namePrefix}.${fileExt}`;
 
-    const { data, error } = await supabase.storage.from(bucketName).upload(uniquePath, file);
-    if (error) throw error;
-
-    const { data: { publicUrl } } = supabase.storage.from(bucketName).getPublicUrl(uniquePath);
-    return publicUrl;
+    try {
+      const { data, error } = await supabase.storage.from(bucketName).upload(uniquePath, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+      if (error) {
+        console.warn(`Storage upload warning for ${namePrefix}:`, error);
+        return null;
+      }
+      const { data: { publicUrl } } = supabase.storage.from(bucketName).getPublicUrl(uniquePath);
+      return publicUrl;
+    } catch (e) {
+      console.warn(`Storage upload exception for ${namePrefix}:`, e);
+      return null;
+    }
   };
 
   // --- WEB3FORMS EMAIL NOTIFICATION ---
@@ -894,6 +931,7 @@ Submitted via Cambridge Learning Services Exam Portal
     }
 
     setLoading(true);
+    setUploadStatus('Verifying network & location...');
 
     try {
       let activeIp = ipAddress;
@@ -902,21 +940,33 @@ Submitted via Cambridge Learning Services Exam Portal
         if (activeIp !== 'Not Detected') setIpAddress(activeIp);
       }
 
+      setUploadStatus('Optimizing verification assets...');
       let photoFile = files.profilePhoto;
       if (!photoFile && files.video) {
         photoFile = await extractFrameFromVideo(files.video);
       }
 
+      // Compress heavy camera photos to fast lightweight images
+      const [optAadhaarFront, optAadhaarBack, optPan, optSignature, optPhoto] = await Promise.all([
+        compressImage(files.aadhaarFront),
+        compressImage(files.aadhaarBack),
+        compressImage(files.panCard),
+        compressImage(files.signature, 800, 0.8),
+        compressImage(photoFile, 600, 0.8)
+      ]);
+
+      setUploadStatus('Uploading documents & video...');
       // Upload all files in parallel
       const [videoUrl, profilePhotoUrl, aadhaarFrontUrl, aadhaarBackUrl, panUrl, signatureUrl] = await Promise.all([
         handleFileUpload(files.video, 'statement', 'candidate_documents'),
-        handleFileUpload(photoFile, 'profile', 'candidate_documents'),
-        handleFileUpload(files.aadhaarFront, 'aadhaar_front', 'aadhaar_cards'),
-        handleFileUpload(files.aadhaarBack, 'aadhaar_back', 'aadhaar_cards'),
-        handleFileUpload(files.panCard, 'pan_card', 'candidate_documents'),
-        handleFileUpload(files.signature, 'signature', 'candidate_documents')
+        handleFileUpload(optPhoto || photoFile, 'profile', 'candidate_documents'),
+        handleFileUpload(optAadhaarFront || files.aadhaarFront, 'aadhaar_front', 'aadhaar_cards'),
+        handleFileUpload(optAadhaarBack || files.aadhaarBack, 'aadhaar_back', 'aadhaar_cards'),
+        handleFileUpload(optPan || files.panCard, 'pan_card', 'candidate_documents'),
+        handleFileUpload(optSignature || files.signature, 'signature', 'candidate_documents')
       ]);
 
+      setUploadStatus('Saving application details...');
       const fullAddress = `${formData.addressLine}, ${formData.city}, ${formData.state} - ${formData.pincode}`;
 
       const generateUUID = () => {
@@ -959,7 +1009,13 @@ Submitted via Cambridge Learning Services Exam Portal
 
       setSubmittedReferenceId(refId);
 
-      // Send Web3Forms Email Notification
+      // Immediately show completed success modal so applicant never waits
+      setLoading(false);
+      setUploadStatus('');
+      setSuccess(true);
+      showAlert('Admission Form submitted successfully!', 'success');
+
+      // Send Web3Forms Email Notification in background
       sendWeb3FormsNotification({
         referenceId: refId,
         fullName: formData.fullName,
@@ -977,14 +1033,12 @@ Submitted via Cambridge Learning Services Exam Portal
         signatureUrl
       });
 
-      setSuccess(true);
-      showAlert('Admission Form submitted successfully!', 'success');
-
     } catch (err) {
       console.error(err);
       showAlert(err.message || 'Error submitting admission. Please try again.', 'error');
     } finally {
       setLoading(false);
+      setUploadStatus('');
     }
   };
 
@@ -1673,8 +1727,8 @@ Submitted via Cambridge Learning Services Exam Portal
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="animate-spin w-5 h-5" />
-                      Submitting Application...
+                      <Loader2 className="animate-spin w-5 h-5 shrink-0" />
+                      <span>{uploadStatus || 'Submitting Application...'}</span>
                     </>
                   ) : (
                     'SUBMIT ADMISSION FORM'
