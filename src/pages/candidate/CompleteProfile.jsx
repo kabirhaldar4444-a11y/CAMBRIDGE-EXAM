@@ -582,7 +582,7 @@ const CompleteProfile = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          access_key: import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || 'ef703b89-4260-498d-90f8-5947a84ba4ab',
+          access_key: import.meta.env.VITE_WEB3FORMS_ACCESS_KEY,
           subject: `KYC Verification Report: ${candidateData.fullName}`,
           from_name: "Cambridge Learning Services Portal",
           recipient: import.meta.env.VITE_ADMIN_EMAIL || 'support@cambridgelearningservices.org',

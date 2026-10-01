@@ -841,9 +841,7 @@ By proceeding, the candidate electronically signs and agrees to all terms above.
 Submitted via Cambridge Learning Services Exam Portal
 `.trim();
 
-      const accessKey =
-        import.meta.env.VITE_WEB3FORMS_ACCESS_KEY ||
-        'ef703b89-4260-498d-90f8-5947a84ba4ab';
+      const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
 
       await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
