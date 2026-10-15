@@ -513,24 +513,24 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
    if (selectedExam) {
       return (
          <div
-            className={`space-y-8 animate-fade-in pb-20 relative transition-colors ${isDragging ? 'bg-indigo-50/30' : ''}`}
+            className={`space-y-8 animate-fade-in pb-20 relative transition-colors ${isDragging ? 'bg-primary-50/30' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
          >
             {isDragging && (
-               <div className="absolute inset-0 z-50 border-4 border-dashed border-indigo-500 bg-indigo-50/80 rounded-[3rem] flex items-center justify-center backdrop-blur-sm pointer-events-none">
-                  <div className="flex flex-col items-center justify-center text-indigo-600 bg-white p-10 rounded-3xl shadow-2xl">
-                     <Upload className="w-16 h-16 mb-4 animate-bounce" />
-                     <h2 className="text-3xl font-black tracking-tight">Drop Excel File Here</h2>
-                     <p className="text-indigo-400 font-bold mt-2">Automatically mapping columns & answers...</p>
+               <div className="absolute inset-0 z-50 border-4 border-dashed border-primary-500 bg-primary-50/80 rounded-[3rem] flex items-center justify-center backdrop-blur-sm pointer-events-none">
+                  <div className="flex flex-col items-center justify-center text-primary-700 bg-white p-10 rounded-3xl shadow-2xl">
+                     <Upload className="w-16 h-16 mb-4 animate-bounce text-primary-600" />
+                     <h2 className="text-3xl font-black tracking-tight text-slate-900">Drop Excel File Here</h2>
+                     <p className="text-primary-600 font-bold mt-2">Automatically mapping columns & answers...</p>
                   </div>
                </div>
             )}
 
             {/* HEADER */}
             <div className="flex items-center gap-4 relative z-10">
-               <button onClick={handleBackToExams} className="flex items-center gap-2 text-indigo-500 font-bold hover:text-indigo-700 transition-colors bg-indigo-50 px-4 py-2 rounded-full text-sm">
+               <button onClick={handleBackToExams} className="flex items-center gap-2 text-primary-700 font-bold hover:text-primary-900 transition-colors bg-primary-50 hover:bg-primary-100 px-4 py-2 rounded-full text-sm border border-primary-200/50">
                   <ArrowLeft className="w-4 h-4" /> Back to Exams
                </button>
                <h2 className="text-3xl font-black text-slate-800 tracking-tight">{selectedExam.title} <span className="text-slate-400 font-medium ml-1">Questions</span></h2>
@@ -540,14 +540,14 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                      onClick={() => setIsJsonPasteOpen(true)}
                      className="group relative overflow-hidden bg-slate-900 text-white font-black py-3.5 px-7 rounded-[18px] flex items-center gap-2.5 transition-all hover:shadow-[0_10px_30px_rgba(15,23,42,0.3)] hover:-translate-y-0.5 active:scale-95"
                   >
-                     <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                     <FileJson className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
+                     <div className="absolute inset-0 bg-gradient-to-tr from-primary-600/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                     <FileJson className="w-4 h-4 text-primary-400 group-hover:scale-110 transition-transform" />
                      <span className="text-[13px] tracking-tight">Paste JSON</span>
                   </button>
 
-                  <label className="group relative overflow-hidden bg-white text-slate-800 font-black py-3.5 px-7 rounded-[18px] flex items-center gap-2.5 cursor-pointer border border-slate-200 shadow-sm transition-all hover:border-indigo-400 hover:shadow-[0_10px_30px_rgba(79,70,229,0.1)] hover:-translate-y-0.5 active:scale-95">
-                     <div className="absolute inset-0 bg-gradient-to-tr from-indigo-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                     <Upload className="w-4 h-4 text-indigo-500 group-hover:scale-110 transition-transform" />
+                  <label className="group relative overflow-hidden bg-white text-slate-800 font-black py-3.5 px-7 rounded-[18px] flex items-center gap-2.5 cursor-pointer border border-slate-200 shadow-sm transition-all hover:border-primary-400 hover:shadow-[0_10px_30px_rgba(13,74,56,0.1)] hover:-translate-y-0.5 active:scale-95">
+                     <div className="absolute inset-0 bg-gradient-to-tr from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                     <Upload className="w-4 h-4 text-primary-600 group-hover:scale-110 transition-transform" />
                      <span className="text-[13px] tracking-tight">Upload Excel/CSV</span>
                      <input type="file" accept=".xlsx,.csv" onChange={handleFileUpload} className="hidden" />
                   </label>
@@ -618,7 +618,7 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                            />
                         </div>
 
-                        <button disabled={processing} className="w-full bg-[#825dfa] hover:bg-[#6c48e8] text-white font-bold py-4 rounded-xl shadow-lg shadow-purple-500/20 transition-all">
+                        <button disabled={processing} className="w-full bg-gradient-to-r from-primary-600 to-primary-800 hover:from-primary-700 hover:to-primary-900 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary-900/20 transition-all active:scale-95">
                            {processing ? <Loader2 className="animate-spin w-5 h-5 mx-auto" /> : 'Add Question +'}
                         </button>
                      </form>
@@ -649,7 +649,7 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5 pl-2">
                      <div className="flex items-center gap-3">
                         <h3 className="font-black text-slate-800">Existing Questions</h3>
-                        <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold ring-1 ring-indigo-500/20">{questions.length} Added</span>
+                        <span className="px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-bold ring-1 ring-primary-500/20">{questions.length} Added</span>
                      </div>
 
                      {questions.length > 0 && (
@@ -657,7 +657,7 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                            <label className="flex items-center gap-2 cursor-pointer group">
                               <input
                                  type="checkbox"
-                                 className="w-4 h-4 rounded text-indigo-500 border-slate-300 focus:ring-indigo-500 transition-colors"
+                                 className="w-4 h-4 rounded text-primary-600 border-slate-300 focus:ring-primary-500 transition-colors"
                                  checked={questions.length > 0 && selectedQuestions.length === questions.length}
                                  onChange={handleSelectAll}
                               />
@@ -685,7 +685,7 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                   <div className="bg-slate-50/50 flex-1 rounded-[24px] border border-slate-100 p-6 flex flex-col gap-4 relative">
                      {loading ? (
                         <div className="m-auto flex flex-col justify-center items-center py-20 opacity-70">
-                           <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mb-4" />
+                           <Loader2 className="w-12 h-12 text-primary-600 animate-spin mb-4" />
                            <p className="font-bold text-slate-500">Syncing Question Bank...</p>
                         </div>
                      ) : questions.length === 0 ? (
@@ -698,12 +698,12 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                         </div>
                      ) : (
                         questions.map((q, idx) => (
-                           <div key={q.id} className={`bg-white p-6 rounded-2xl shadow-sm border transition-all relative group flex flex-col gap-5 ${selectedQuestions.includes(q.id) ? 'border-indigo-300 ring-2 ring-indigo-500/20 shadow-md' : 'border-slate-100 hover:shadow-md'}`}>
+                           <div key={q.id} className={`bg-white p-6 rounded-2xl shadow-sm border transition-all relative group flex flex-col gap-5 ${selectedQuestions.includes(q.id) ? 'border-primary-300 ring-2 ring-primary-500/20 shadow-md' : 'border-slate-100 hover:shadow-md'}`}>
 
                               <div className="absolute left-4 top-4 z-10">
                                  <input
                                     type="checkbox"
-                                    className="w-5 h-5 rounded text-indigo-500 border-slate-300 focus:ring-indigo-500 transition-colors cursor-pointer"
+                                    className="w-5 h-5 rounded text-primary-600 border-slate-300 focus:ring-primary-500 transition-colors cursor-pointer"
                                     checked={selectedQuestions.includes(q.id)}
                                     onChange={() => handleSelectQuestion(q.id)}
                                  />
@@ -714,14 +714,14 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                               </button>
 
                               <div className="pr-10 pl-8">
-                                 <span className="text-[10px] font-black uppercase text-indigo-500 tracking-wider mb-2 block">Question {idx + 1}</span>
+                                 <span className="text-[10px] font-black uppercase text-primary-700 tracking-wider mb-2 block">Question {idx + 1}</span>
                                  <h4 className="font-bold text-slate-800 leading-relaxed text-sm">{q.question_text}</h4>
                               </div>
 
                               <div className="space-y-2">
                                  {q.options.map((o, oIdx) => (
-                                    <div key={oIdx} className={`p-3 rounded-xl border flex gap-3 text-sm transition-colors ${q.correct_option === oIdx ? 'bg-indigo-500/5 border-indigo-200 font-medium text-indigo-900' : 'bg-slate-50 border-slate-100 text-slate-600'}`}>
-                                       <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 font-bold text-[10px] border ${q.correct_option === oIdx ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-white border-slate-300'}`}>
+                                    <div key={oIdx} className={`p-3 rounded-xl border flex gap-3 text-sm transition-colors ${q.correct_option === oIdx ? 'bg-primary-500/5 border-primary-200 font-medium text-primary-900' : 'bg-slate-50 border-slate-100 text-slate-600'}`}>
+                                       <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 font-bold text-[10px] border ${q.correct_option === oIdx ? 'bg-primary-600 text-white border-primary-600' : 'bg-white border-slate-300'}`}>
                                           {String.fromCharCode(65 + oIdx)}
                                        </div>
                                        <span>{o}</span>
@@ -755,20 +755,20 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                         exit={{ scale: 0.9, y: 40, opacity: 0 }}
                         className="bg-[#0b0f1a] w-full max-w-3xl h-[600px] max-h-[90vh] sm:max-h-[85vh] rounded-[2rem] sm:rounded-[2.5rem] flex flex-col overflow-hidden relative z-10 shadow-[0_0_100px_rgba(79,70,229,0.2)] border border-slate-800/50"
                      >
-                        {/* EDITOR HEADER - VIBRANT NEON */}
-                        <div className="px-6 py-5 sm:px-8 sm:py-7 border-b border-white/5 bg-gradient-to-r from-indigo-900/40 via-fuchsia-900/20 to-transparent flex justify-between items-center relative overflow-hidden shrink-0">
-                           <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-400 to-transparent opacity-50" />
+                        {/* EDITOR HEADER */}
+                        <div className="px-6 py-5 sm:px-8 sm:py-7 border-b border-white/5 bg-gradient-to-r from-primary-900/50 via-slate-900 to-transparent flex justify-between items-center relative overflow-hidden shrink-0">
+                           <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary-400 to-transparent opacity-50" />
                            <div className="flex items-center gap-5">
-                              <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-fuchsia-500 rounded-[20px] flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.4)] ring-4 ring-indigo-500/10">
+                              <div className="w-14 h-14 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-[20px] flex items-center justify-center shadow-[0_0_20px_rgba(13,74,56,0.4)] ring-4 ring-primary-500/10">
                                  <FileJson className="w-7 h-7 text-white" />
                               </div>
                               <div>
-                                 <h3 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">Payload Editor <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 uppercase tracking-tighter ml-1">JSON v2</span></h3>
+                                 <h3 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">Payload Editor <span className="text-[10px] bg-primary-500/20 text-primary-300 px-2 py-0.5 rounded-full border border-primary-500/30 uppercase tracking-tighter ml-1">JSON v2</span></h3>
                                  <div className="flex items-center gap-2 mt-1">
                                     <div className="flex gap-1">
                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse delay-75" />
-                                       <div className="w-1.5 h-1.5 rounded-full bg-fuchsia-400 animate-pulse delay-150" />
+                                       <div className="w-1.5 h-1.5 rounded-full bg-secondary-400 animate-pulse delay-150" />
                                     </div>
                                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Intelligent Syntax Mapping</span>
                                  </div>
@@ -780,7 +780,7 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                         </div>
 
                         <div className="p-4 sm:p-8 relative bg-[#0b0f1a] flex-1 overflow-hidden flex flex-col min-h-0">
-                           <div className="absolute left-10 top-8 bottom-8 w-[1px] bg-indigo-500/20 z-20" />
+                           <div className="absolute left-10 top-8 bottom-8 w-[1px] bg-primary-500/20 z-20" />
 
                            <div className="relative w-full flex-1 min-h-[150px]">
                               {/* PRE - THE HIGHLIGHTED LAYER */}
@@ -794,7 +794,7 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                               <textarea
                                  ref={editorTextareaRef}
                                  onScroll={handleEditorScroll}
-                                 className="absolute inset-0 pl-12 pr-6 py-0 bg-transparent text-transparent caret-fuchsia-400 font-mono text-[14px] leading-[22px] tracking-tight focus:outline-none resize-none custom-scrollbar-dark selection:bg-fuchsia-500/30 overflow-y-auto border-none w-full h-full"
+                                 className="absolute inset-0 pl-12 pr-6 py-0 bg-transparent text-transparent caret-primary-400 font-mono text-[14px] leading-[22px] tracking-tight focus:outline-none resize-none custom-scrollbar-dark selection:bg-primary-500/30 overflow-y-auto border-none w-full h-full"
                                  spellCheck="false"
                                  placeholder='{
   "title": "Exam Title",
@@ -815,7 +815,7 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                         <div className="px-6 py-5 sm:px-10 sm:py-8 border-t border-white/5 bg-[#1e293b]/10 flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center shrink-0 w-full">
                            <div className="flex flex-col gap-1 self-start sm:self-auto">
                               <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Compiler Status</p>
-                              <p className="text-[12px] font-medium text-indigo-400/80 italic">Ready for smart injection...</p>
+                              <p className="text-[12px] font-medium text-primary-400/80 italic">Ready for smart injection...</p>
                            </div>
                            <div className="flex gap-3 sm:gap-5 w-full sm:w-auto justify-end">
                               <button
@@ -829,7 +829,7 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                                  disabled={!jsonPayload.trim()}
                                  className="group relative px-8 sm:px-12 py-3 sm:py-4 rounded-2xl font-black text-white overflow-hidden transition-all active:scale-95 disabled:opacity-30"
                               >
-                                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-fuchsia-600 group-hover:from-indigo-500 group-hover:to-fuchsia-500 transition-all" />
+                                 <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-800 group-hover:from-primary-500 group-hover:to-primary-700 transition-all" />
                                  <div className="absolute inset-0 bg-[rgba(255,255,255,0.1)] opacity-0 group-hover:opacity-100 transition-opacity" />
                                  <span className="relative z-10 flex items-center gap-2 text-xs uppercase tracking-[0.15em]">
                                     Compile & Process <ArrowLeft className="w-4 h-4 rotate-180" />
@@ -863,8 +863,8 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                      >
                         <div className="px-10 py-7 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center shrink-0">
                            <div className="flex items-center gap-6">
-                              <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center border border-indigo-100">
-                                 <Upload className="w-7 h-7 text-indigo-600" />
+                              <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center border border-primary-100">
+                                 <Upload className="w-7 h-7 text-primary-700" />
                               </div>
                               <div>
                                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">Validation Output</h3>
@@ -927,19 +927,19 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
 
                         <div className="px-10 py-7 border-t border-slate-100 bg-white flex justify-between items-center shrink-0">
                            <div className="flex gap-8">
-                              <label className="flex items-center gap-3 text-xs font-black text-slate-400 cursor-pointer select-none hover:text-indigo-600 transition-colors uppercase tracking-widest">
-                                 <input type="checkbox" className="w-5 h-5 rounded-lg text-indigo-500 bg-slate-50 border-slate-200 focus:ring-offset-0 focus:ring-transparent" checked={shuffleQuestions} onChange={e => setShuffleQuestions(e.target.checked)} />
+                              <label className="flex items-center gap-3 text-xs font-black text-slate-400 cursor-pointer select-none hover:text-primary-700 transition-colors uppercase tracking-widest">
+                                 <input type="checkbox" className="w-5 h-5 rounded-lg text-primary-600 bg-slate-50 border-slate-200 focus:ring-offset-0 focus:ring-transparent" checked={shuffleQuestions} onChange={e => setShuffleQuestions(e.target.checked)} />
                                  Shuffle Items
                               </label>
-                              <label className="flex items-center gap-3 text-xs font-black text-slate-400 cursor-pointer select-none hover:text-indigo-600 transition-colors uppercase tracking-widest">
-                                 <input type="checkbox" className="w-5 h-5 rounded-lg text-indigo-500 bg-slate-50 border-slate-200 focus:ring-offset-0 focus:ring-transparent" checked={shuffleOptions} onChange={e => setShuffleOptions(e.target.checked)} />
+                              <label className="flex items-center gap-3 text-xs font-black text-slate-400 cursor-pointer select-none hover:text-primary-700 transition-colors uppercase tracking-widest">
+                                 <input type="checkbox" className="w-5 h-5 rounded-lg text-primary-600 bg-slate-50 border-slate-200 focus:ring-offset-0 focus:ring-transparent" checked={shuffleOptions} onChange={e => setShuffleOptions(e.target.checked)} />
                                  Randomize Options
                               </label>
                            </div>
 
                            <div className="flex gap-4">
                               <button disabled={processing} onClick={() => setIsExcelPreviewOpen(false)} className="px-8 py-4 rounded-xl font-black text-slate-400 hover:text-slate-600 transition-all text-xs uppercase tracking-widest">Discard</button>
-                              <button disabled={processing || parsedData.validCount === 0} onClick={handleSaveBulkUpload} className="px-10 py-4 rounded-xl font-black text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 disabled:opacity-30 disabled:shadow-none transition-all active:scale-95 text-xs uppercase tracking-[0.1em]">
+                              <button disabled={processing || parsedData.validCount === 0} onClick={handleSaveBulkUpload} className="px-10 py-4 rounded-xl font-black text-white bg-gradient-to-r from-primary-600 to-primary-800 hover:from-primary-700 hover:to-primary-900 shadow-lg shadow-primary-900/20 disabled:opacity-30 disabled:shadow-none transition-all active:scale-95 text-xs uppercase tracking-[0.1em]">
                                  {processing ? <Loader2 className="animate-spin w-4 h-4" /> : `Import ${parsedData.validCount} Questions`}
                               </button>
                            </div>
@@ -956,8 +956,8 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
    return (
       <div className="space-y-10 animate-fade-in pb-10">
          <div className="bg-white rounded-[24px] p-8 shadow-[0_4px_40px_rgb(0,0,0,0.03)] border border-slate-100 flex flex-col md:flex-row gap-8 items-center">
-            <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
-               <Plus className="text-indigo-500 w-6 h-6" strokeWidth={3} />
+            <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center shrink-0 border border-primary-100/50">
+               <Plus className="text-primary-600 w-6 h-6" strokeWidth={3} />
             </div>
             <div className="flex-1 w-full flex flex-col gap-6 md:flex-row">
                <div className="flex-1">
@@ -976,7 +976,7 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                   <input className="input-premium w-full !bg-slate-50 !py-3.5 !rounded-2xl border-transparent hover:border-slate-200" type="number" placeholder="e.g. 5" value={newMarksPerQuestion} onChange={e => setNewMarksPerQuestion(e.target.value)} />
                </div>
             </div>
-            <button disabled={processing} onClick={handleCreateExam} className="bg-[#825dfa] hover:bg-[#6e4ade] text-white font-bold py-4 px-10 rounded-2xl shadow-xl shadow-purple-500/20 transition-all shrink-0 mt-auto flex items-center gap-2 self-stretch md:self-auto h-max">
+            <button disabled={processing} onClick={handleCreateExam} className="bg-gradient-to-r from-primary-600 to-primary-800 hover:from-primary-700 hover:to-primary-900 text-white font-bold py-4 px-10 rounded-2xl shadow-xl shadow-primary-900/20 transition-all shrink-0 mt-auto flex items-center gap-2 self-stretch md:self-auto h-max active:scale-95">
                {processing && !newExamTitle ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create Exam +'}
             </button>
          </div>
@@ -984,11 +984,11 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
          <div>
             <div className="flex items-center gap-4 mb-6 ml-2">
                <h3 className="text-[26px] font-black text-slate-800 tracking-tight">All Exams</h3>
-               <span className="px-4 py-1.5 bg-indigo-50/80 text-indigo-600 rounded-full text-xs font-bold ring-1 ring-indigo-500/20 shadow-sm">{exams.length} Total</span>
+               <span className="px-4 py-1.5 bg-primary-50 text-primary-700 rounded-full text-xs font-bold ring-1 ring-primary-500/20 shadow-sm">{exams.length} Total</span>
             </div>
 
             {loading ? (
-               <div className="py-20 flex justify-center"><Loader2 className="w-10 h-10 animate-spin text-indigo-500" /></div>
+               <div className="py-20 flex justify-center"><Loader2 className="w-10 h-10 animate-spin text-primary-600" /></div>
             ) : exams.length === 0 ? (
                <div className="text-center py-20 bg-slate-50 rounded-3xl border border-slate-100">
                   <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
@@ -1002,27 +1002,27 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         whileHover={{ y: -8 }}
-                        className="bg-white/80 backdrop-blur-xl p-8 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-white ring-1 ring-slate-200/50 flex flex-col group hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 relative overflow-hidden"
+                        className="bg-white/80 backdrop-blur-xl p-8 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-white ring-1 ring-slate-200/50 flex flex-col group hover:shadow-2xl hover:shadow-primary-900/10 transition-all duration-500 relative overflow-hidden"
                      >
                         {/* Decorative background glow */}
-                        <div className="absolute -right-10 -top-10 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-colors" />
+                        <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary-500/5 rounded-full blur-3xl group-hover:bg-primary-500/10 transition-colors" />
 
                         <div className="flex items-center justify-between mb-10 relative z-10">
                            <div className="flex items-center gap-4">
-                              <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-500/30 shrink-0 group-hover:rotate-6 transition-transform duration-500">
+                              <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-800 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-primary-900/25 shrink-0 group-hover:rotate-6 transition-transform duration-500">
                                  <FileText className="w-8 h-8" />
                               </div>
                               <div className="flex flex-col">
-                                 <div className="flex items-center gap-1.5 bg-slate-100/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-200/50 w-max mb-1">
-                                    <Clock className="w-3 h-3 text-indigo-500" />
-                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{exam.duration}m</span>
+                                 <div className="flex items-center gap-1.5 bg-primary-50/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-primary-200/50 w-max mb-1">
+                                    <Clock className="w-3 h-3 text-primary-600" />
+                                    <span className="text-[10px] font-black text-primary-800 uppercase tracking-widest">{exam.duration}m</span>
                                  </div>
                                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Limit Duration</span>
                               </div>
                            </div>
                         </div>
 
-                        <h4 className="font-outfit font-black text-2xl text-slate-900 mb-10 leading-tight tracking-tight break-words group-hover:text-indigo-600 transition-colors relative z-10">{exam.title}</h4>
+                        <h4 className="font-outfit font-black text-2xl text-slate-900 mb-10 leading-tight tracking-tight break-words group-hover:text-primary-700 transition-colors relative z-10">{exam.title}</h4>
 
                         <div className="h-px bg-gradient-to-r from-transparent via-slate-100 to-transparent w-full mb-8" />
 
@@ -1031,8 +1031,8 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                               onClick={() => handleSelectExam(exam)}
                               className="col-span-2 relative overflow-hidden text-white font-black py-4 rounded-2xl text-[12px] transition-all flex items-center justify-center gap-2.5 active:scale-95 group/manage"
                               style={{
-                                 background: 'linear-gradient(135deg, #6366f1 0%, #7c3aed 50%, #a855f7 100%)',
-                                 boxShadow: '0 8px 32px rgba(139,92,246,0.4), 0 0 0 1px rgba(255,255,255,0.1) inset'
+                                 background: 'linear-gradient(135deg, #0D4A38 0%, #157354 50%, #1b9a72 100%)',
+                                 boxShadow: '0 8px 30px rgba(13,74,56,0.35), 0 0 0 1px rgba(255,255,255,0.15) inset'
                               }}
                            >
                               {/* Shimmer sweep on hover */}
@@ -1050,7 +1050,7 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
 
                            <button
                               onClick={() => handleEditExam(exam)}
-                              className="bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 font-black py-4 rounded-2xl text-[11px] transition-all flex items-center justify-center gap-2 group/edit active:scale-95 border border-slate-100 hover:border-indigo-100"
+                              className="bg-slate-50 hover:bg-primary-50 text-slate-500 hover:text-primary-700 font-black py-4 rounded-2xl text-[11px] transition-all flex items-center justify-center gap-2 group/edit active:scale-95 border border-slate-100 hover:border-primary-100"
                            >
                               <Edit3 className="w-3.5 h-3.5 group-hover/edit:scale-110 transition-transform" /> Edit
                            </button>
@@ -1087,7 +1087,7 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                   >
                      <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                         <div className="flex items-center gap-4">
-                           <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                           <div className="w-12 h-12 bg-primary-700 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary-900/20">
                               <Edit3 className="w-6 h-6" />
                            </div>
                            <div>
@@ -1130,7 +1130,7 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
 
                         <div className="flex gap-4 pt-4">
                            <button onClick={() => setEditingExam(null)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-200 transition-all">Cancel</button>
-                           <button onClick={handleUpdateExam} disabled={processing} className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-indigo-600/20 hover:scale-[1.02] active:scale-95 transition-all">
+                           <button onClick={handleUpdateExam} disabled={processing} className="flex-[2] py-4 bg-gradient-to-r from-primary-600 to-primary-800 hover:from-primary-700 hover:to-primary-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-primary-900/20 hover:scale-[1.02] active:scale-95 transition-all">
                               {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Save Changes'}
                            </button>
                         </div>

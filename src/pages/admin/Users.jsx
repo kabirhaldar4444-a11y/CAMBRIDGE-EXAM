@@ -419,7 +419,7 @@ const Users = () => {
                     setCreateModalRole('admin');
                     setIsCreateModalOpen(true);
                   }}
-                  className="btn-premium !py-3 !px-6 h-[48px] bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-full shadow-lg shadow-purple-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2"
+                  className="btn-premium !py-3 !px-6 h-[48px] bg-gradient-to-r from-primary-600 to-primary-800 hover:from-primary-700 hover:to-primary-900 text-white font-bold rounded-full shadow-lg shadow-primary-900/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2"
                 >
                   <Plus className="w-5 h-5" /> Create Admin User
                 </button>
@@ -567,7 +567,13 @@ const CandidateCard = ({ user, onView, onEdit, onDelete, canManage }) => (
   >
     <div className="flex items-center gap-4">
       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 overflow-hidden flex items-center justify-center text-white text-xl font-bold shadow-lg">
-        {user.profile_photo_url ? <img src={user.profile_photo_url} className="w-full h-full object-cover" /> : user.full_name?.charAt(0) || '?'}
+        {user.profile_photo_url?.includes('.webm') || user.profile_photo_url?.includes('video') ? (
+          <video src={user.profile_photo_url} autoPlay loop muted playsInline className="w-full h-full object-cover pointer-events-none" />
+        ) : user.profile_photo_url ? (
+          <img src={user.profile_photo_url} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+        ) : (
+          user.full_name?.charAt(0) || '?'
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <h4 className="font-outfit font-bold text-lg text-slate-800 truncate">{user.full_name || 'Incomplete Profile'}</h4>
@@ -623,9 +629,9 @@ const AdminAccessControl = ({ users, searchTerm, setSearchTerm, onAddAdmin, onVi
     <div className="space-y-6 animate-slide-up">
       <div className="bg-white/60 backdrop-blur-xl border border-white/60 p-8 rounded-[2rem] flex flex-col md:flex-row items-center gap-8 ring-1 ring-slate-100 shadow-sm relative overflow-hidden">
         {/* Soft decorative glow */}
-        <div className="absolute -left-20 -top-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -left-20 -top-20 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 border border-purple-100 relative z-10 shrink-0">
+        <div className="w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-700 border border-primary-100 relative z-10 shrink-0">
           <Shield className="w-8 h-8" />
         </div>
         <div className="flex-1 relative z-10">
@@ -638,9 +644,9 @@ const AdminAccessControl = ({ users, searchTerm, setSearchTerm, onAddAdmin, onVi
         </div>
 
         <div className="flex items-center gap-4 relative z-10 w-full md:w-auto">
-          <div className="flex-1 md:flex-none px-6 py-4 bg-purple-50 rounded-2xl border border-purple-100 text-center ring-2 ring-purple-500/10 backdrop-blur-sm">
-            <span className="block text-2xl font-black text-purple-600 leading-none">{staffAdmins.length}</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-purple-600/60 mt-1 block">Staff Admins</span>
+          <div className="flex-1 md:flex-none px-6 py-4 bg-primary-50 rounded-2xl border border-primary-100 text-center ring-2 ring-primary-500/10 backdrop-blur-sm">
+            <span className="block text-2xl font-black text-primary-700 leading-none">{staffAdmins.length}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-primary-700/70 mt-1 block">Staff Admins</span>
           </div>
           <div className="flex-1 md:flex-none px-6 py-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
             <span className="block text-2xl font-black text-slate-600 leading-none">{candidates.length}</span>
@@ -649,7 +655,7 @@ const AdminAccessControl = ({ users, searchTerm, setSearchTerm, onAddAdmin, onVi
         </div>
 
         {isSuperAdmin && (
-          <button onClick={onAddAdmin} className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-4 px-6 rounded-2xl shadow-xl shadow-purple-500/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 relative z-10">
+          <button onClick={onAddAdmin} className="w-full md:w-auto bg-gradient-to-r from-primary-600 to-primary-800 hover:from-primary-700 hover:to-primary-900 text-white font-bold py-4 px-6 rounded-2xl shadow-xl shadow-primary-900/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 relative z-10">
             <Plus className="w-5 h-5" /> Add New Admin
           </button>
         )}
@@ -669,7 +675,7 @@ const AdminAccessControl = ({ users, searchTerm, setSearchTerm, onAddAdmin, onVi
         {filteredAdmins.map(admin => (
           <div key={admin.id} className="bg-white/80 backdrop-blur-md p-5 rounded-2xl border border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-md transition-shadow group">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-indigo-100 border border-purple-200/50 flex items-center justify-center text-purple-600 font-bold overflow-hidden shadow-inner">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200/50 flex items-center justify-center text-primary-700 font-bold overflow-hidden shadow-inner">
                 {admin.profile_photo_url ? <img src={admin.profile_photo_url} className="w-full h-full object-cover" /> : admin.full_name?.charAt(0) || 'A'}
               </div>
               <div>
@@ -686,7 +692,7 @@ const AdminAccessControl = ({ users, searchTerm, setSearchTerm, onAddAdmin, onVi
             </div>
 
             <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
-              <div className="px-4 py-1.5 bg-purple-50 text-purple-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-purple-100 flex items-center gap-1.5">
+              <div className="px-4 py-1.5 bg-primary-50 text-primary-700 text-[10px] font-black uppercase tracking-widest rounded-full border border-primary-100 flex items-center gap-1.5">
                 <Shield className="w-3 h-3" /> ADMIN
               </div>
 
@@ -694,14 +700,14 @@ const AdminAccessControl = ({ users, searchTerm, setSearchTerm, onAddAdmin, onVi
                 <span className="text-sm font-bold text-slate-500 hidden sm:block">Admin Access</span>
                 <button
                   disabled={!isSuperAdmin}
-                  className={`w-12 h-6 rounded-full relative p-0.5 shadow-inner transition-colors focus:outline-none ring-2 ring-transparent ${isSuperAdmin ? 'bg-purple-500 cursor-pointer focus:ring-purple-200' : 'bg-slate-300 cursor-not-allowed'}`}
+                  className={`w-12 h-6 rounded-full relative p-0.5 shadow-inner transition-colors focus:outline-none ring-2 ring-transparent ${isSuperAdmin ? 'bg-primary-600 cursor-pointer focus:ring-primary-200' : 'bg-slate-300 cursor-not-allowed'}`}
                 >
                   <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${isSuperAdmin ? 'right-0.5' : 'left-0.5'}`}></div>
                 </button>
               </div>
 
               <div className="flex items-center gap-2 pl-4 border-l border-slate-100">
-                <button onClick={() => onView(admin)} className="p-2 rounded-xl text-slate-400 hover:text-purple-600 hover:bg-purple-50 transition-all group/icon">
+                <button onClick={() => onView(admin)} className="p-2 rounded-xl text-slate-400 hover:text-primary-700 hover:bg-primary-50 transition-all group/icon">
                   <Eye className="w-4 h-4 group-hover/icon:scale-110" />
                 </button>
                 {isSuperAdmin && (
@@ -754,8 +760,8 @@ const CreateUserModal = ({ isOpen, onClose, newUser, setNewUser, handleCreateUse
             initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
             className="bg-white max-w-[440px] w-full rounded-[1.5rem] shadow-2xl relative z-10 flex flex-col overflow-hidden border border-white/20 max-h-[90vh]"
           >
-            {/* Header Section Matches Screenshot */}
-            <div className={`p-6 flex justify-between items-start shrink-0 ${isAdmin ? 'bg-gradient-to-r from-purple-500 to-indigo-500' : 'bg-gradient-to-r from-blue-500 to-cyan-500'}`}>
+            {/* Header Section */}
+            <div className={`p-6 flex justify-between items-start shrink-0 ${isAdmin ? 'bg-gradient-to-r from-primary-700 to-primary-900' : 'bg-gradient-to-r from-secondary-600 to-secondary-800'}`}>
               <div className="flex gap-3 items-center">
                 <div className="bg-white/20 p-2.5 rounded-[10px] backdrop-blur-md">
                   {isAdmin ? <Shield className="w-5 h-5 text-white" /> : <User className="w-5 h-5 text-white" />}
@@ -788,7 +794,7 @@ const CreateUserModal = ({ isOpen, onClose, newUser, setNewUser, handleCreateUse
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-500" />
                       <input
                         type="email" required placeholder="candidate@cambridgelearningservices.com"
-                        className="w-full pl-[50px] pr-4 py-3.5 bg-slate-100/80 border border-slate-200 text-slate-800 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:bg-white transition-all text-[15px] font-medium placeholder:font-normal placeholder:text-slate-400"
+                        className="w-full pl-[50px] pr-4 py-3.5 bg-slate-100/80 border border-slate-200 text-slate-800 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white transition-all text-[15px] font-medium placeholder:font-normal placeholder:text-slate-400"
                         value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })}
                       />
                     </div>
@@ -800,7 +806,7 @@ const CreateUserModal = ({ isOpen, onClose, newUser, setNewUser, handleCreateUse
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-500" />
                       <input
                         type="text" required placeholder="e.g. John Doe"
-                        className="w-full pl-[50px] pr-4 py-3.5 bg-slate-100/80 border border-slate-200 text-slate-800 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:bg-white transition-all text-[15px] font-medium placeholder:font-normal placeholder:text-slate-400"
+                        className="w-full pl-[50px] pr-4 py-3.5 bg-slate-100/80 border border-slate-200 text-slate-800 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white transition-all text-[15px] font-medium placeholder:font-normal placeholder:text-slate-400"
                         value={newUser.fullName} onChange={e => setNewUser({ ...newUser, fullName: e.target.value })}
                       />
                     </div>
@@ -813,12 +819,12 @@ const CreateUserModal = ({ isOpen, onClose, newUser, setNewUser, handleCreateUse
                       <input
                         type="password" required placeholder="Generate a secure password..."
                         {...(showPassword ? { type: "text" } : {})}
-                        className="w-full pl-[50px] pr-[85px] py-3.5 bg-slate-100/80 border border-slate-200 text-slate-800 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:bg-white transition-all text-[15px] font-medium placeholder:font-normal placeholder:text-slate-400"
+                        className="w-full pl-[50px] pr-[85px] py-3.5 bg-slate-100/80 border border-slate-200 text-slate-800 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white transition-all text-[15px] font-medium placeholder:font-normal placeholder:text-slate-400"
                         value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })}
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2.5 text-slate-500">
-                        <button type="button" onClick={generatePassword} className="hover:text-indigo-600 transition-colors p-1"><RotateCw className="w-4 h-4" strokeWidth={2.5} /></button>
-                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="hover:text-indigo-600 transition-colors p-1">
+                        <button type="button" onClick={generatePassword} className="hover:text-primary-700 transition-colors p-1"><RotateCw className="w-4 h-4" strokeWidth={2.5} /></button>
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="hover:text-primary-700 transition-colors p-1">
                           {showPassword ? <X className="w-4 h-4" strokeWidth={2.5} /> : <Eye className="w-4 h-4" strokeWidth={2.5} />}
                         </button>
                       </div>
@@ -831,7 +837,7 @@ const CreateUserModal = ({ isOpen, onClose, newUser, setNewUser, handleCreateUse
                       <div className="relative">
                         <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-500" />
                         <select
-                          className="w-full pl-[50px] pr-4 py-3.5 bg-slate-100/80 border border-slate-200 text-slate-800 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:bg-white transition-all text-[15px] font-medium appearance-none cursor-pointer"
+                          className="w-full pl-[50px] pr-4 py-3.5 bg-slate-100/80 border border-slate-200 text-slate-800 rounded-[14px] focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white transition-all text-[15px] font-medium appearance-none cursor-pointer"
                           value={newUser.allottedExamId}
                           onChange={e => setNewUser({ ...newUser, allottedExamId: e.target.value })}
                         >
@@ -851,7 +857,7 @@ const CreateUserModal = ({ isOpen, onClose, newUser, setNewUser, handleCreateUse
                 <button
                   form="create-user-form"
                   disabled={creating}
-                  className={`w-full py-4 rounded-[14px] font-bold text-white shadow-lg transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:hover:translate-y-0 flex items-center justify-center gap-2 ${isAdmin ? 'bg-indigo-500 shadow-indigo-500/30' : 'bg-blue-500 shadow-blue-500/30'}`}
+                  className={`w-full py-4 rounded-[14px] font-bold text-white shadow-lg transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:hover:translate-y-0 flex items-center justify-center gap-2 ${isAdmin ? 'bg-gradient-to-r from-primary-600 to-primary-800 shadow-primary-900/25' : 'bg-gradient-to-r from-secondary-600 to-secondary-800 shadow-secondary-900/25'}`}
                 >
                   {creating ? <Loader2 className="animate-spin w-5 h-5" /> : `Create ${isAdmin ? 'Staff' : 'Candidate'} Account`}
                 </button>
@@ -1584,7 +1590,13 @@ const ViewCandidateDrawer = ({ user, onClose, onViewDoc, onViewBreakdown }) => {
             <div className="p-6 md:p-8 bg-white border-b border-slate-100 flex items-center justify-between shadow-sm z-20">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 overflow-hidden flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                  {user.profile_photo_url ? <img src={user.profile_photo_url} className="w-full h-full object-cover" /> : user.full_name?.charAt(0) || '?'}
+                  {user.profile_photo_url?.includes('.webm') || user.profile_photo_url?.includes('video') ? (
+                    <video src={user.profile_photo_url} autoPlay loop muted playsInline className="w-full h-full object-cover pointer-events-none" />
+                  ) : user.profile_photo_url ? (
+                    <img src={user.profile_photo_url} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                  ) : (
+                    user.full_name?.charAt(0) || '?'
+                  )}
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-slate-800 leading-none mb-1">{user.full_name || 'Incomplete Profile'}</h2>

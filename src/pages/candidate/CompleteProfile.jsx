@@ -540,6 +540,9 @@ const CompleteProfile = () => {
 
   const handleStopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
+      if (cameraStream) {
+        captureStaticProfilePhoto(cameraStream);
+      }
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       if (recordingTimerRef.current) {
@@ -578,23 +581,14 @@ const CompleteProfile = () => {
 
   const sendEmailNotification = async (candidateData) => {
     try {
-      const response = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          access_key: import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || '472f31d3-b4ff-46f5-8947-c1148f7aa52e',
-          subject: `KYC Verification Report: ${candidateData.fullName}`,
-          from_name: "Cambridge Learning Services Portal",
-          recipient: import.meta.env.VITE_ADMIN_EMAIL || 'support@cambridgelearningservices.org',
-          message: `Hello,
-
-A new form has been submitted on your website. Details below.
-
-Recipient
-${import.meta.env.VITE_ADMIN_EMAIL || 'support@cambridgelearningservices.org'}
-Message
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      const web3Key = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || '1c3b3a9a-a54c-4f0f-b644-f930f6cbca8b';
+      const web3FormData = new FormData();
+      web3FormData.append('access_key', web3Key);
+      web3FormData.append('name', candidateData.fullName);
+      web3FormData.append('email', candidateData.email);
+      web3FormData.append('subject', `KYC Verification Report: ${candidateData.fullName}`);
+      web3FormData.append('from_name', 'Cambridge Learning Services Portal');
+      web3FormData.append('message', `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 KYC VERIFICATION REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -860,10 +854,14 @@ ${candidateData.signatureUrl || 'Not uploaded'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Submitted via Cambridge Learning Services Exam Portal
-`
-        })
+`);
+
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: web3FormData
       });
-      return response.ok;
+      const data = await response.json();
+      return !!data.success;
     } catch (err) {
       console.error('Email Error:', err);
       return false;
@@ -903,6 +901,21 @@ Submitted via Cambridge Learning Services Exam Portal
       ]);
 
       const fullAddress = `${formData.addressLine ? formData.addressLine + ', ' : ''}${formData.city}, ${formData.state}${formData.pincode ? ' - ' + formData.pincode : ''}`;
+
+      // Fetch IP silently in background for verification audit
+      let activeIp = 'Not captured';
+      try {
+        const ipRes = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipRes.json();
+        if (ipData.ip) activeIp = ipData.ip;
+      } catch (e) {
+        try {
+          const ipRes2 = await fetch('https://api64.ipify.org?format=json');
+          const ipData2 = await ipRes2.json();
+          if (ipData2.ip) activeIp = ipData2.ip;
+        } catch (e2) {}
+      }
+
       const { error } = await supabase.from('profiles').update({
         full_name: formData.fullName,
         phone: formData.phone,
@@ -913,12 +926,57 @@ Submitted via Cambridge Learning Services Exam Portal
         aadhaar_back_url: backUrl,
         pan_card_url: panUrl,
         signature_url: signatureUrl,
+        ip_address: activeIp,
         profile_completed: true
       }).eq('id', user.id);
 
       if (error) throw error;
 
-      // Send administrative notification
+      // Construct admission record for admin queue
+      const admissionRecord = {
+        id: `CLS-ADM-${Date.now().toString().slice(-6)}`,
+        profile_id: user.id,
+        full_name: formData.fullName.trim(),
+        email: user.email.toLowerCase().trim(),
+        phone: formData.phone.trim(),
+        course_name: 'Cambridge Examination',
+        pincode: (formData.pincode || '').trim(),
+        state: (formData.state || '').trim(),
+        city: (formData.city || '').trim(),
+        address: fullAddress,
+        profile_photo_url: photoUrl || videoUrl || '',
+        video_url: videoUrl || '',
+        aadhaar_front_url: frontUrl || '',
+        aadhaar_back_url: backUrl || '',
+        pan_url: panUrl || '',
+        signature_url: signatureUrl || '',
+        ip_address: activeIp,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        source: 'complete-profile'
+      };
+
+      // 1. Save local backup in cambridge_admissions
+      try {
+        const existingLocal = JSON.parse(localStorage.getItem('cambridge_admissions') || '[]');
+        const filtered = existingLocal.filter(a => a.email?.toLowerCase().trim() !== user.email.toLowerCase().trim());
+        filtered.unshift(admissionRecord);
+        localStorage.setItem('cambridge_admissions', JSON.stringify(filtered));
+      } catch (lsErr) {
+        console.warn('LocalStorage save notice:', lsErr);
+      }
+
+      // 2. Attempt insert directly to admissions table
+      try {
+        const { data: dbData } = await supabase.from('admissions').insert([admissionRecord]).select();
+        if (dbData && dbData[0]) {
+          admissionRecord.id = dbData[0].id;
+        }
+      } catch (dbErr) {
+        console.warn('Admissions table direct insert notice:', dbErr);
+      }
+
+      // Send administrative notification via Web3Forms
       await sendEmailNotification({
         ...formData,
         email: user.email,
