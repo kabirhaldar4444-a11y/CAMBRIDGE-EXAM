@@ -1625,9 +1625,6 @@ const ViewCandidateDrawer = ({ user, onClose, onViewDoc, onViewBreakdown }) => {
                       <Mail className="w-4 h-4" /> {user.email}
                     </div>
                     <div className="flex items-center gap-3 text-slate-600 font-medium">
-                      <Phone className="w-4 h-4" /> {maskPhone(user.phone)}
-                    </div>
-                    <div className="flex items-center gap-3 text-slate-600 font-medium">
                       <MapPin className="w-4 h-4" /> {maskAddress(user.address)}
                     </div>
                   </div>

@@ -701,14 +701,6 @@ const AdmissionsManagement = () => {
                         <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                         <span className="truncate">{adm.email}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>
-                          {adm.phone && !adm.phone.startsWith('NO_PHONE') && adm.phone.trim() !== '' && adm.phone.trim() !== '+91' && adm.phone !== 'N/A'
-                            ? (adm.phone.startsWith('+91') ? adm.phone : `+91 ${adm.phone}`)
-                            : 'No Phone Provided'}
-                        </span>
-                      </div>
                     </div>
                   </div>
 
