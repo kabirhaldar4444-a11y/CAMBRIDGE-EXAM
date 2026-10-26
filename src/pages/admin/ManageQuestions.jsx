@@ -114,15 +114,65 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
    const handleDeleteExam = (examId) => {
       confirm({
          title: 'Delete Exam?',
-         message: 'Are you sure you want to delete this exam and all its questions? This action is permanent.',
+         message: 'Are you sure you want to delete this exam and all its questions and submissions? This action is permanent.',
          type: 'danger',
          confirmText: 'Delete Exam',
          onConfirm: async () => {
-            const { error } = await supabase.from('exams').delete().eq('id', examId);
-            if (error) showAlert(error.message, 'error');
-            else {
+            setProcessing(true);
+            try {
+               // 1. Attempt database RPC if available
+               const { error: rpcError } = await supabase.rpc('delete_exam_by_id', { p_exam_id: examId });
+
+               if (rpcError) {
+                  // Fallback: Delete related records in child tables first to avoid FK constraint violations
+                  const { error: subError } = await supabase
+                     .from('submissions')
+                     .delete()
+                     .eq('exam_id', examId);
+                  if (subError) throw subError;
+
+                  const { error: qError } = await supabase
+                     .from('questions')
+                     .delete()
+                     .eq('exam_id', examId);
+                  if (qError) throw qError;
+
+                  const { error: examError } = await supabase
+                     .from('exams')
+                     .delete()
+                     .eq('id', examId);
+                  if (examError) throw examError;
+
+                  // Clean up allotted_exam_ids array in candidate profiles
+                  try {
+                     const { data: profs } = await supabase
+                        .from('profiles')
+                        .select('id, allotted_exam_ids')
+                        .contains('allotted_exam_ids', [examId]);
+
+                     if (profs && profs.length > 0) {
+                        await Promise.all(
+                           profs.map(p => {
+                              const updated = (p.allotted_exam_ids || []).filter(id => id !== examId);
+                              return supabase
+                                 .from('profiles')
+                                 .update({ allotted_exam_ids: updated })
+                                 .eq('id', p.id);
+                           })
+                        );
+                     }
+                  } catch (cleanupErr) {
+                     console.warn('Non-fatal: failed to clean up allotted_exam_ids from profiles', cleanupErr);
+                  }
+               }
+
                showAlert('Exam deleted successfully.', 'success');
                fetchExams();
+            } catch (error) {
+               console.error('Delete exam error:', error);
+               showAlert(error.message || 'Failed to delete exam.', 'error');
+            } finally {
+               setProcessing(false);
             }
          }
       });

@@ -131,8 +131,8 @@ ALTER TABLE public.questions ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEF
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.submissions (
   id                   UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id              UUID        REFERENCES auth.users(id) NOT NULL,
-  exam_id              UUID        REFERENCES public.exams(id) NOT NULL,
+  user_id              UUID        REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  exam_id              UUID        REFERENCES public.exams(id) ON DELETE CASCADE NOT NULL,
   score                INTEGER     NOT NULL,
   total_questions      INTEGER     NOT NULL,
   answers              JSONB       NOT NULL,   -- question index -> chosen option index
@@ -156,6 +156,23 @@ ALTER TABLE public.submissions ADD COLUMN IF NOT EXISTS final_score_override INT
 ALTER TABLE public.submissions ADD COLUMN IF NOT EXISTS calculated_score     INTEGER     DEFAULT NULL;
 ALTER TABLE public.submissions ADD COLUMN IF NOT EXISTS calculated_total     INTEGER     DEFAULT NULL;
 ALTER TABLE public.submissions ADD COLUMN IF NOT EXISTS created_at           TIMESTAMPTZ DEFAULT TIMEZONE('utc'::TEXT, NOW());
+
+-- Ensure cascading foreign keys idempotently for exams, submissions, and questions
+ALTER TABLE public.submissions DROP CONSTRAINT IF EXISTS submissions_exam_id_fkey;
+ALTER TABLE public.submissions 
+  ADD CONSTRAINT submissions_exam_id_fkey 
+  FOREIGN KEY (exam_id) REFERENCES public.exams(id) ON DELETE CASCADE;
+
+ALTER TABLE public.submissions DROP CONSTRAINT IF EXISTS submissions_user_id_fkey;
+ALTER TABLE public.submissions 
+  ADD CONSTRAINT submissions_user_id_fkey 
+  FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+ALTER TABLE public.questions DROP CONSTRAINT IF EXISTS questions_exam_id_fkey;
+ALTER TABLE public.questions 
+  ADD CONSTRAINT questions_exam_id_fkey 
+  FOREIGN KEY (exam_id) REFERENCES public.exams(id) ON DELETE CASCADE;
+
 
 
 -- ------------------------------------------------------------
@@ -568,6 +585,36 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION public.delete_user_by_id(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.delete_user_by_id(UUID) TO service_role;
+
+
+-- ------------------------------------------------------------
+-- 4. delete_exam_by_id()
+-- Cascades examination deletion including questions and submissions safely
+-- ------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.delete_exam_by_id(p_exam_id UUID)
+RETURNS VOID AS $$
+DECLARE
+  v_caller_role TEXT;
+BEGIN
+  SELECT role INTO v_caller_role FROM public.profiles WHERE id = auth.uid();
+  IF v_caller_role NOT IN ('admin', 'super_admin') THEN
+    RAISE EXCEPTION 'Access Denied: Only administrators can delete examinations.';
+  END IF;
+
+  DELETE FROM public.submissions WHERE exam_id = p_exam_id;
+  DELETE FROM public.questions   WHERE exam_id = p_exam_id;
+  DELETE FROM public.exams       WHERE id = p_exam_id;
+
+  -- Remove deleted exam from all candidate profiles
+  UPDATE public.profiles
+  SET allotted_exam_ids = array_remove(allotted_exam_ids, p_exam_id)
+  WHERE p_exam_id = ANY(allotted_exam_ids);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.delete_exam_by_id(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.delete_exam_by_id(UUID) TO service_role;
+
 
 
 -- ============================================================================================================================
