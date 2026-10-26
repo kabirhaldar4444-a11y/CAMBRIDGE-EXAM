@@ -17,7 +17,8 @@ import {
    BookOpen,
    Layout,
    Code,
-   FileJson
+   FileJson,
+   Search
 } from 'lucide-react';
 import { useAlert } from '../../context/AlertProvider';
 import * as XLSX from 'xlsx';
@@ -64,6 +65,17 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
    const [editExamTitle, setEditExamTitle] = useState('');
    const [editExamDuration, setEditExamDuration] = useState('');
    const [editMarksPerQuestion, setEditMarksPerQuestion] = useState('5');
+   const [examSearchTerm, setExamSearchTerm] = useState('');
+
+   const filteredExams = exams.filter(exam => {
+      const term = examSearchTerm.trim().toLowerCase();
+      if (!term) return true;
+      const titleMatch = (exam.title || '').toLowerCase().includes(term);
+      const descMatch = (exam.description || '').toLowerCase().includes(term);
+      const durationMatch = (exam.duration || '').toString().includes(term);
+      const marksMatch = (exam.marks_per_question || '').toString().includes(term);
+      return titleMatch || descMatch || durationMatch || marksMatch;
+   });
 
    useEffect(() => {
       fetchExams();
@@ -1032,9 +1044,34 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
          </div>
 
          <div>
-            <div className="flex items-center gap-4 mb-6 ml-2">
-               <h3 className="text-[26px] font-black text-slate-800 tracking-tight">All Exams</h3>
-               <span className="px-4 py-1.5 bg-primary-50 text-primary-700 rounded-full text-xs font-bold ring-1 ring-primary-500/20 shadow-sm">{exams.length} Total</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+               <div className="flex items-center gap-3.5 ml-1">
+                  <h3 className="text-[26px] font-black text-slate-800 tracking-tight">All Exams</h3>
+                  <span className="px-4 py-1.5 bg-primary-50 text-primary-700 rounded-full text-xs font-bold ring-1 ring-primary-500/20 shadow-sm">
+                     {filteredExams.length} {filteredExams.length === exams.length ? 'Total' : `of ${exams.length}`}
+                  </span>
+               </div>
+
+               {/* Search Bar */}
+               <div className="relative w-full sm:w-80 group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary-600 transition-colors pointer-events-none" />
+                  <input
+                     type="text"
+                     placeholder="Search exams by title, duration..."
+                     value={examSearchTerm}
+                     onChange={(e) => setExamSearchTerm(e.target.value)}
+                     className="w-full bg-white/90 backdrop-blur-md pl-11 pr-10 py-3 rounded-2xl border border-slate-200/80 text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 shadow-sm transition-all"
+                  />
+                  {examSearchTerm && (
+                     <button
+                        onClick={() => setExamSearchTerm('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                        title="Clear search"
+                     >
+                        <X className="w-3.5 h-3.5" />
+                     </button>
+                  )}
+               </div>
             </div>
 
             {loading ? (
@@ -1044,9 +1081,23 @@ const ManageQuestions = ({ examId: initialExamId, onBack, onSubViewChange }) => 
                   <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                   <p className="text-slate-500 font-bold">No exams created yet.</p>
                </div>
+            ) : filteredExams.length === 0 ? (
+               <div className="text-center py-16 bg-white/70 backdrop-blur-md rounded-3xl border border-slate-200/60 shadow-sm">
+                  <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-slate-400">
+                     <Search className="w-6 h-6" />
+                  </div>
+                  <h4 className="font-bold text-slate-800 text-lg mb-1">No matching exams found</h4>
+                  <p className="text-slate-400 text-sm mb-4">No examinations match &ldquo;{examSearchTerm}&rdquo;</p>
+                  <button
+                     onClick={() => setExamSearchTerm('')}
+                     className="px-5 py-2 text-xs font-bold text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-full transition-colors border border-primary-200/50 active:scale-95"
+                  >
+                     Clear Search Filter
+                  </button>
+               </div>
             ) : (
                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {exams.map(exam => (
+                  {filteredExams.map(exam => (
                      <motion.div
                         key={exam.id}
                         initial={{ opacity: 0, y: 20 }}
