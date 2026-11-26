@@ -691,10 +691,24 @@ export default function AdmissionForm() {
       }
 
       // Save local backup in cambridge_admissions (deduplicated by email)
-      const existingLocal = JSON.parse(localStorage.getItem('cambridge_admissions') || '[]')
-        .filter(a => a.email?.toLowerCase().trim() !== admissionRecord.email.toLowerCase().trim());
-      existingLocal.unshift({ ...admissionRecord, id: recordId });
-      localStorage.setItem('cambridge_admissions', JSON.stringify(existingLocal));
+      try {
+        const sanitizedLocalRecord = {
+          ...admissionRecord,
+          id: recordId,
+          aadhaar_front_url: frontUrl?.startsWith('http') ? frontUrl : '',
+          aadhaar_back_url: backUrl?.startsWith('http') ? backUrl : '',
+          pan_url: panUrl?.startsWith('http') ? panUrl : '',
+          signature_url: signUrl?.startsWith('http') ? signUrl : '',
+          profile_photo_url: photoUrl?.startsWith('http') ? photoUrl : '',
+          video_url: videoUrl?.startsWith('http') ? videoUrl : ''
+        };
+        const existingLocal = JSON.parse(localStorage.getItem('cambridge_admissions') || '[]')
+          .filter(a => a.email?.toLowerCase().trim() !== admissionRecord.email.toLowerCase().trim());
+        existingLocal.unshift(sanitizedLocalRecord);
+        localStorage.setItem('cambridge_admissions', JSON.stringify(existingLocal.slice(0, 20)));
+      } catch (lsErr) {
+        console.warn('LocalStorage backup notice:', lsErr);
+      }
 
       // Notification via Web3Forms (Admission Verification Report)
       try {
@@ -954,14 +968,12 @@ By proceeding, the candidate electronically signs and agrees to all terms above.
 
 Submitted via Cambridge Learning Services Exam Portal`;
 
-        const web3Key = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "1c3b3a9a-a54c-4f0f-b644-f930f6cbca8b";
-
         const formData = new FormData();
-        formData.append("access_key", web3Key);
-        formData.append("subject", `Admission Verification Report — ${fullName.trim()} (${recordId})`);
-        formData.append("from_name", "Cambridge Learning Services Admission Portal");
-        formData.append("recipient", import.meta.env.VITE_ADMIN_EMAIL || "admin@cambridgelearningservices.com");
+        formData.append("access_key", "1c3b3a9a-a54c-4f0f-b644-f930f6cbca8b");
+        formData.append("name", fullName.trim());
         formData.append("email", email.trim().toLowerCase());
+        formData.append("subject", `Admission Form Submitted - ${fullName.trim()} (${courseName.trim()})`);
+        formData.append("from_name", "Cambridge Learning Services Admission Portal");
         formData.append("message", reportMessage);
 
         const response = await fetch("https://api.web3forms.com/submit", {
@@ -969,13 +981,13 @@ Submitted via Cambridge Learning Services Exam Portal`;
           body: formData
         });
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
         if (data.success) {
           setResult("Form Submitted Successfully");
           setSubmittedId(recordId);
         } else {
-          setResult("Error");
-          console.error("Web3Forms Notice: Email submission error", data);
+          setResult(data.message ? `Error: ${data.message}` : "Error");
+          console.error("Web3Forms Notice: Email submission error", response.status, data);
           setSubmittedId(recordId);
         }
       } catch (e) {
@@ -1017,7 +1029,11 @@ Submitted via Cambridge Learning Services Exam Portal`;
           </div>
 
           <div className="space-y-2">
-            <div className="inline-block px-3.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold">
+            <div className={`inline-block px-3.5 py-1 border rounded-full text-xs font-bold ${
+              result?.startsWith('Error')
+                ? 'bg-rose-50 text-rose-700 border-rose-200'
+                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            }`}>
               <span>{result || "Form Submitted Successfully"}</span>
             </div>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight font-outfit">Application Submitted!</h2>
